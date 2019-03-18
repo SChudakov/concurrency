@@ -1,7 +1,10 @@
+<<<<<<< HEAD
 .idea/*
 cmake-build-debug/*
 lib/*
 
+=======
+>>>>>>> c1c920bc582dcd77e79a2fa97511b0f294f0f2ae
 # Prerequisites
 *.d
 
