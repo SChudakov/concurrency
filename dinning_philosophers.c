@@ -1,10 +1,11 @@
 //
 // Created by Semen on 2/18/2019.
 //
-#include<stdio.h>
-#include<stdlib.h>
-#include<pthread.h>
-#include<unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <string.h>
 
 #include "concurrent_queue.h"
 
@@ -63,6 +64,7 @@ struct ChopSticksMonitor *ChopSticksMonitor_new(int size) {
         monitor->chop_sticks_and_mutexes[i] = ChopStickMutexAndQueue_new(ChopSick_new(i), concurrent_queue_new());
         if (pthread_mutex_init(&(monitor->chop_sticks_and_mutexes[i]->lock), NULL) != 0) {
             printf("init failed for mutex %d\n", i);
+            printf("return NULL\n");
             return NULL;
         }
     }
@@ -78,16 +80,19 @@ struct ChopSticksMonitor *ChopSticksMonitor_new(int size) {
 struct ChopSick *get_chop_stick(struct ChopSticksMonitor *monitor, int stick_index, const pthread_t *thread_id) {
 //    printf("[%d] get_chop_stick\n", index);
     if (stick_index >= monitor->monitor_size) {
-        printf("return NULL");
+        printf("return NULL\n");
         return NULL;
     }
     pthread_t *first_thread_id = (pthread_t *) concurrent_queue_first(
             monitor->chop_sticks_and_mutexes[stick_index]->threads_queue);
+//    printf("first scc\n");
     if (*(thread_id) == *(first_thread_id)) {
         pthread_mutex_lock(&monitor->chop_sticks_and_mutexes[stick_index]->lock);
         concurrent_queue_remove(monitor->chop_sticks_and_mutexes[stick_index]->threads_queue);
+//        printf("remove scc\n");
         return monitor->chop_sticks_and_mutexes[stick_index]->chopSick;
     } else {
+        printf("return NULL\n");
         return NULL;
     }
 }
@@ -99,7 +104,7 @@ struct ChopSick *get_chop_stick(struct ChopSticksMonitor *monitor, int stick_ind
  * to the chop stick
  */
 void return_chop_stick(struct ChopSticksMonitor *monitor, int stick_index) {
-    printf("[%d] return_chop_stick\n", stick_index);
+//    printf("[%d] return_chop_stick\n", stick_index);
     if (stick_index >= monitor->monitor_size) {
         printf("illegal index in return_chop_stick function");
     }
@@ -111,7 +116,8 @@ void return_chop_stick(struct ChopSticksMonitor *monitor, int stick_index) {
  * function while starting a new thread
  */
 struct PhilosopherData {
-    pthread_t *id;
+    int id;
+    pthread_t *thread_id;
     int left_chop_stick_index;
     int right_chop_stick_index;
     struct ChopSticksMonitor *monitor;
@@ -120,10 +126,11 @@ struct PhilosopherData {
 /*
  * Constructor for PhilosopherData
  */
-struct PhilosopherData *PhilosopherData_new(pthread_t *philosopher_index,
+struct PhilosopherData *PhilosopherData_new(int id, pthread_t *philosopher_index,
                                             int left, int right, struct ChopSticksMonitor *monitor) {
     struct PhilosopherData *data = (struct PhilosopherData *) malloc(sizeof(struct PhilosopherData));
-    data->id = philosopher_index;
+    data->id = id;
+    data->thread_id = philosopher_index;
     data->left_chop_stick_index = left;
     data->right_chop_stick_index = right;
     data->monitor = monitor;
@@ -139,41 +146,40 @@ struct PhilosopherData *PhilosopherData_new(pthread_t *philosopher_index,
  */
 void *philosopher(void *arg) {
     struct PhilosopherData *data = (struct PhilosopherData *) arg;
-    printf("[%llu] philosopher started\n", *data->id);
-    while (1) {
+    printf("[%d] philosopher started\n", data->id);
+    for (int i = 0; i < 10; i++) {
         concurrent_queue_add(data->monitor->chop_sticks_and_mutexes[data->left_chop_stick_index]->threads_queue,
-                             data->id);
-//        printf("[%llu] left stick queue state: ", *data->id);
+                             data->thread_id);
+//        printf("[%lu] left stick queue state: ", *data->thread_id);
 //        concurrent_queue_print(data->monitor->chop_sticks_and_mutexes[data->left_chop_stick_index]->threads_queue);
         struct ChopSick *left_stick = NULL;
         while (left_stick == NULL) {
-            left_stick = get_chop_stick(data->monitor, data->left_chop_stick_index, data->id);
+            left_stick = get_chop_stick(data->monitor, data->left_chop_stick_index, data->thread_id);
         }
-//        printf("[%llu] got left chop stick\n", *data->id);
+//        printf("[%lu] got left chop stick\n", *data->thread_id);
 
         concurrent_queue_add(data->monitor->chop_sticks_and_mutexes[data->right_chop_stick_index]->threads_queue,
-                             data->id);
-//        printf("[%llu] right stick queue state: ", *data->id);
+                             data->thread_id);
+//        printf("[%lu] right stick queue state: ", *data->thread_id);
 //        concurrent_queue_print(data->monitor->chop_sticks_and_mutexes[data->right_chop_stick_index]->threads_queue);
         struct ChopSick *right_stick = NULL;
         while (right_stick == NULL) {
-            right_stick = get_chop_stick(data->monitor, data->right_chop_stick_index, data->id);
+            right_stick = get_chop_stick(data->monitor, data->right_chop_stick_index, data->thread_id);
         }
-//        printf("[%llu] got right chop stick\n", *data->id);
+//        printf("[%llu] got right chop stick\n", *data->thread_id);
 
-        for (int i = 0; i < 5; i++) {
-//            printf("[%llu] philosopher is dining\n", *data->id);
+        for (int j = 0; j < 5; j++) {
+            printf("[%d] philosopher is dining\n", data->id);
             sleep(1);
         }
-        pthread_t id = *data->id;
-        printf("%llu", id);
-        num_of_meals[id - 1]++;
+//        printf("id: %d", data->id);
+        num_of_meals[data->id]++;
 
         return_chop_stick(data->monitor, data->left_chop_stick_index);
         return_chop_stick(data->monitor, data->right_chop_stick_index);
 
-        for (int i = 0; i < 5; i++) {
-//            printf("[%llu] philosopher is thinking\n", *data->id);
+        for (int j = 0; j < 5; j++) {
+            printf("[%d] philosopher is thinking\n", data->id);
             sleep(1);
         }
     }
@@ -203,7 +209,7 @@ int main() {
     struct ChopSticksMonitor *monitor = ChopSticksMonitor_new(num_of_philosophers);
     int error = 0;
     for (int i = 0; i < num_of_philosophers; i++) {
-        struct PhilosopherData *data = PhilosopherData_new(&(thread_ids[i]),
+        struct PhilosopherData *data = PhilosopherData_new(i, &(thread_ids[i]),
                                                            min(i, (i + 1) % num_of_philosophers),
                                                            max(i, (i + 1) % num_of_philosophers),
                                                            monitor);
@@ -212,12 +218,12 @@ int main() {
             printf("\nThread %d can't be created :[%s]\n", i, strerror(error));
         }
     }
-    sleep(600);
+    sleep(60);
     for (int i = 0; i < num_of_philosophers; i++) {
         pthread_cancel(thread_ids[i]);
     }
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < num_of_philosophers; i++) {
         printf("%d ", num_of_meals[i]);
     }
     printf("\n");

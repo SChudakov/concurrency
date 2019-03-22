@@ -3,11 +3,14 @@
 //
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "concurrent_queue.h"
 
 struct node *node_new(void *data) {
+//    printf("node_new\n");
+
     struct node *result = (struct node *) malloc(sizeof(struct node));
     result->data = data;
     result->next = NULL;
@@ -16,6 +19,8 @@ struct node *node_new(void *data) {
 }
 
 extern void node_delete(struct node *node) {
+//    printf("node_delete\n");
+
     if (node->previous != NULL) {
         node_delete(node->previous);
         node->previous = NULL;
@@ -29,6 +34,7 @@ extern void node_delete(struct node *node) {
 
 
 struct concurrent_queue *concurrent_queue_new() {
+//    printf("concurrent_queue_new\n");
     struct concurrent_queue *result = (struct concurrent_queue *) malloc(sizeof(struct concurrent_queue));
     result->size = 0;
     result->first = NULL;
@@ -42,6 +48,8 @@ struct concurrent_queue *concurrent_queue_new() {
 
 void concurrent_queue_add(struct concurrent_queue *queue, void *data) {
     pthread_mutex_lock(&(queue->queue_mutex));
+//    printf("concurrent_queue_add\n");
+
     struct node *node = node_new(data);
     if (queue->first == NULL && queue->last == NULL) {
         queue->first = node;
@@ -61,15 +69,19 @@ void concurrent_queue_add(struct concurrent_queue *queue, void *data) {
 
 void *concurrent_queue_remove(struct concurrent_queue *queue) {
     pthread_mutex_lock(&(queue->queue_mutex));
+//    printf("concurrent_queue_remove\n");
     void *result = NULL;
     if (queue->first == NULL && queue->last == NULL) { // empty queue
+//        printf("here\n");
         result = NULL;
     } else if (queue->first == queue->last) {
+//        printf("here\n");
         result = queue->first->data;
         node_delete(queue->first);
         queue->first = NULL;
         queue->last = NULL;
     } else {
+//        printf("here\n");
         struct node *tmp_last = queue->last;
         queue->last = queue->last->next;
 
@@ -77,24 +89,37 @@ void *concurrent_queue_remove(struct concurrent_queue *queue) {
         tmp_last->next = NULL;
 
         result = tmp_last->data;
+//        if (result == NULL) {
+//            printf("kek\n");
+//        }
         node_delete(tmp_last);
     }
+//    printf("here\n");
     pthread_mutex_unlock(&(queue->queue_mutex));
+//    printf("here\n");
     return result;
 }
 
 void *concurrent_queue_first(struct concurrent_queue *queue) {
     pthread_mutex_lock(&(queue->queue_mutex));
+//    printf("concurrent_queue_first\n");
     struct node *result = queue->first;
+//    if (result == NULL) {
+//        printf("kek\n");
+//    }
+//    if (result->data == NULL) {
+//        printf("lol\n");
+//    }
     pthread_mutex_unlock(&(queue->queue_mutex));
     return result->data;
 }
 
 void concurrent_queue_print(struct concurrent_queue *queue) {
     pthread_mutex_lock(&(queue->queue_mutex));
+//    printf("concurrent_queue_print\n");
     struct node *it = queue->first;
     while (it != NULL) {
-        printf("%llu->", *((pthread_t *) it->data));
+        printf("%lu->", *((pthread_t *) it->data));
         it = it->next;
     }
     printf("\n");
