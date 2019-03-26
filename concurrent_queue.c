@@ -7,15 +7,15 @@
 
 #include "concurrent_queue.h"
 
-struct node *node_new(void *data) {
-    struct node *result = (struct node *) malloc(sizeof(struct node));
+struct cq_node *node_new(void *data) {
+    struct cq_node *result = (struct cq_node *) malloc(sizeof(struct cq_node));
     result->data = data;
     result->next = NULL;
     result->previous = NULL;
     return result;
 }
 
-extern void node_delete(struct node *node) {
+extern void node_delete(struct cq_node *node) {
     if (node->previous != NULL) {
         node_delete(node->previous);
         node->previous = NULL;
@@ -42,7 +42,7 @@ struct concurrent_queue *concurrent_queue_new() {
 
 void concurrent_queue_add(struct concurrent_queue *queue, void *data) {
     pthread_mutex_lock(&(queue->queue_mutex));
-    struct node *node = node_new(data);
+    struct cq_node *node = node_new(data);
     if (queue->first == NULL && queue->last == NULL) {
         queue->first = node;
         queue->last = node;
@@ -50,7 +50,7 @@ void concurrent_queue_add(struct concurrent_queue *queue, void *data) {
         queue->last = node;
         queue->first->previous = node;
     } else {
-        struct node *tmp_last = queue->last;
+        struct cq_node *tmp_last = queue->last;
         node->next = tmp_last;
         tmp_last->previous = node;
         queue->last = node;
@@ -70,7 +70,7 @@ void *concurrent_queue_remove(struct concurrent_queue *queue) {
         queue->first = NULL;
         queue->last = NULL;
     } else {
-        struct node *tmp_last = queue->last;
+        struct cq_node *tmp_last = queue->last;
         queue->last = queue->last->next;
 
         queue->last->previous = NULL;
@@ -85,14 +85,14 @@ void *concurrent_queue_remove(struct concurrent_queue *queue) {
 
 void *concurrent_queue_first(struct concurrent_queue *queue) {
     pthread_mutex_lock(&(queue->queue_mutex));
-    struct node *result = queue->first;
+    struct cq_node *result = queue->first;
     pthread_mutex_unlock(&(queue->queue_mutex));
     return result->data;
 }
 
 void concurrent_queue_print(struct concurrent_queue *queue) {
     pthread_mutex_lock(&(queue->queue_mutex));
-    struct node *it = queue->first;
+    struct cq_node *it = queue->first;
     while (it != NULL) {
         printf("%llu->", *((pthread_t *) it->data));
         it = it->next;

@@ -3,4 +3,6 @@ project(concurrency C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(concurrency main.c dinning_philosophers.c threads_intercommunication.c concurrent_queue.c concurrent_queue.h)
+add_executable(concurrency dinning_philosophers.c threads_intercommunication.c
+        concurrent_queue.c concurrent_queue.h
+        transfer_queue.c transfer_queue.h)
