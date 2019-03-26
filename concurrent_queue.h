@@ -7,19 +7,19 @@
 
 #ifndef CONCURRENCY_CONCURRENT_QUEUE_H
 #define CONCURRENCY_CONCURRENT_QUEUE_H
-struct node {
+struct cq_node {
     void *data;
-    struct node *next;
-    struct node *previous;
+    struct cq_node *next;
+    struct cq_node *previous;
 };
 
-extern struct node *node_new(void *data);
+extern struct cq_node *node_new(void *data);
 
-extern void node_delete(struct node *node);
+extern void node_delete(struct cq_node *node);
 
 struct concurrent_queue {
-    struct node *first;
-    struct node *last;
+    struct cq_node *first;
+    struct cq_node *last;
     int size;
     pthread_mutex_t queue_mutex;
 };

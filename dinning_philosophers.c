@@ -85,11 +85,9 @@ struct ChopSick *get_chop_stick(struct ChopSticksMonitor *monitor, int stick_ind
     }
     pthread_t *first_thread_id = (pthread_t *) concurrent_queue_first(
             monitor->chop_sticks_and_mutexes[stick_index]->threads_queue);
-//    printf("first scc\n");
     if (*(thread_id) == *(first_thread_id)) {
         pthread_mutex_lock(&monitor->chop_sticks_and_mutexes[stick_index]->lock);
         concurrent_queue_remove(monitor->chop_sticks_and_mutexes[stick_index]->threads_queue);
-//        printf("remove scc\n");
         return monitor->chop_sticks_and_mutexes[stick_index]->chopSick;
     } else {
         printf("return NULL\n");
