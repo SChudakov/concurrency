@@ -199,32 +199,32 @@ int max(int a, int b) {
  * chop sticks and starts the
  * philosophers threads.
  */
-int main() {
-    printf("main started\n");
-    const int num_of_philosophers = 5;
-    pthread_t thread_ids[num_of_philosophers];
-    for (int i = 0; i < num_of_philosophers; i++) { thread_ids[i] = 0; }
-    struct ChopSticksMonitor *monitor = ChopSticksMonitor_new(num_of_philosophers);
-    int error = 0;
-    for (int i = 0; i < num_of_philosophers; i++) {
-        struct PhilosopherData *data = PhilosopherData_new(i, &(thread_ids[i]),
-                                                           min(i, (i + 1) % num_of_philosophers),
-                                                           max(i, (i + 1) % num_of_philosophers),
-                                                           monitor);
-        error = pthread_create(&(thread_ids[i]), NULL, &philosopher, (void *) data);
-        if (error != 0) {
-            printf("\nThread %d can't be created :[%s]\n", i, strerror(error));
-        }
-    }
-    sleep(60);
-    for (int i = 0; i < num_of_philosophers; i++) {
-        pthread_cancel(thread_ids[i]);
-    }
-
-    for (int i = 0; i < num_of_philosophers; i++) {
-        printf("%d ", num_of_meals[i]);
-    }
-    printf("\n");
-
-    return 0;
-}
+//int main() {
+//    printf("main started\n");
+//    const int num_of_philosophers = 5;
+//    pthread_t thread_ids[num_of_philosophers];
+//    for (int i = 0; i < num_of_philosophers; i++) { thread_ids[i] = 0; }
+//    struct ChopSticksMonitor *monitor = ChopSticksMonitor_new(num_of_philosophers);
+//    int error = 0;
+//    for (int i = 0; i < num_of_philosophers; i++) {
+//        struct PhilosopherData *data = PhilosopherData_new(i, &(thread_ids[i]),
+//                                                           min(i, (i + 1) % num_of_philosophers),
+//                                                           max(i, (i + 1) % num_of_philosophers),
+//                                                           monitor);
+//        error = pthread_create(&(thread_ids[i]), NULL, &philosopher, (void *) data);
+//        if (error != 0) {
+//            printf("\nThread %d can't be created :[%s]\n", i, strerror(error));
+//        }
+//    }
+//    sleep(60);
+//    for (int i = 0; i < num_of_philosophers; i++) {
+//        pthread_cancel(thread_ids[i]);
+//    }
+//
+//    for (int i = 0; i < num_of_philosophers; i++) {
+//        printf("%d ", num_of_meals[i]);
+//    }
+//    printf("\n");
+//
+//    return 0;
+//}

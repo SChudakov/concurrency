@@ -5,7 +5,7 @@
 #ifndef CONCURRENCY_TRANSFER_QUEUE_H
 #define CONCURRENCY_TRANSFER_QUEUE_H
 
-#include <semaphore.h   >
+#include <semaphore.h>
 
 struct transfer_queue {
     sem_t put_sem;

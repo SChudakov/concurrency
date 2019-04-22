@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "transfer_queue.h"
 
@@ -124,12 +125,13 @@ void ThreadArg_delete(struct ThreadArg *arg) {
 void *f(void *arg) {
     printf("f() is started\n");
     struct ThreadArg *casted_arg = (struct ThreadArg *) arg;
+//    if (casted_arg->perform_message_action) {
+//        printf("f() tries to put message in the exchanger\n");
+//        tq_put(casted_arg->queue, casted_arg->message);
+//        printf("f() has put message into transfer queue");
+//    }
+    sleep(100);
 
-    if (casted_arg->perform_message_action) {
-        printf("f() tries to put message in the exchanger\n");
-        tq_put(casted_arg->queue, casted_arg->message);
-        printf("f() has put message into transfer queue");
-    }
     casted_arg->result_container->result = casted_arg->result;
     pthread_exit(0);
 }
@@ -138,12 +140,11 @@ void *g(void *arg) {
     printf("g() is started\n");
     struct ThreadArg *casted_arg = (struct ThreadArg *) arg;
 
-
-    if (casted_arg->perform_message_action) {
-        printf("g() tries to get message from the exchanger\n");
-        struct Message *m = (struct Message *) tq_get(casted_arg->queue);
-        printf("g() received message from transfer queue: %s \n", m->value);
-    }
+//    if (casted_arg->perform_message_action) {
+//        printf("g() tries to get message from the exchanger\n");
+//        struct Message *m = (struct Message *) tq_get(casted_arg->queue);
+//        printf("g() received message from transfer queue: %s \n", m->value);
+//    }
 
     casted_arg->result_container->result = casted_arg->result;
     pthread_exit(0);
@@ -158,7 +159,7 @@ int main() {
     struct Result *f_result = Result_new(true);
     struct ResultContainer *f_container = ResultContainer_new(NULL);
     struct Message *f_message = Message_new("this is from f");
-    bool f_perform_message_action = false;
+    bool f_perform_message_action = true;
     struct ThreadArg *f_arg = ThreadArg_new(
             f_result,
             f_container,
@@ -168,7 +169,7 @@ int main() {
     );
 //    printf("f_arg constructed\n");
 
-    struct Result *g_result = Result_new(false);
+    struct Result *g_result = Result_new(true);
     struct ResultContainer *g_container = ResultContainer_new(NULL);
     struct Message *g_message = Message_new("this is from g");
     bool g_perform_message_action = true;
@@ -207,6 +208,10 @@ int main() {
             g_res = g_arg->result_container->result;
         }
         if (f_res != NULL && g_res != NULL) {
+            break;
+        }else if(f_res != NULL && f_res->value){
+            break;
+        }else if(g_res != NULL && g_res->value){
             break;
         }
         if (f_res == NULL && g_res == NULL) {
