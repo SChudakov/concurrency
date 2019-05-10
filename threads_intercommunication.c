@@ -150,110 +150,110 @@ void *g(void *arg) {
     pthread_exit(0);
 }
 
-int main() {
-    printf("main started\n");
-    pthread_t thread_ids[2];
-
-    struct transfer_queue *queue = transfer_queue_new();
-
-    struct Result *f_result = Result_new(true);
-    struct ResultContainer *f_container = ResultContainer_new(NULL);
-    struct Message *f_message = Message_new("this is from f");
-    bool f_perform_message_action = true;
-    struct ThreadArg *f_arg = ThreadArg_new(
-            f_result,
-            f_container,
-            f_message,
-            queue,
-            f_perform_message_action
-    );
-//    printf("f_arg constructed\n");
-
-    struct Result *g_result = Result_new(true);
-    struct ResultContainer *g_container = ResultContainer_new(NULL);
-    struct Message *g_message = Message_new("this is from g");
-    bool g_perform_message_action = true;
-    struct ThreadArg *g_arg = ThreadArg_new(
-            g_result,
-            g_container,
-            g_message,
-            queue,
-            g_perform_message_action
-    );
-//    printf("g_arg constructed\n");
-
-    int error = 0;
-
-    error = pthread_create(&(thread_ids[0]), NULL, &f, (void *) f_arg);
-    if (error != 0) {
-        printf("\nThread for function f() cannot be created: [%s]\n", strerror(error));
-    }
-
-    error = pthread_create(&(thread_ids[1]), NULL, &g, (void *) g_arg);
-    if (error != 0) {
-        printf("\nThread for function g() cannot be created: [%s]\n", strerror(error));
-    }
-
-    struct Result *f_res = NULL;
-    struct Result *g_res = NULL;
-    bool aborted = false;
-    while (true) {
-        sleep(2);
-        if (f_arg->result_container->result != NULL) {
-            printf("receive result from f(): %s\n", f_arg->result_container->result->value ? "true" : "false");
-            f_res = f_arg->result_container->result;
-        }
-        if (g_arg->result_container->result != NULL) {
-            printf("receive result from g(): %s\n", g_arg->result_container->result->value ? "true" : "false");
-            g_res = g_arg->result_container->result;
-        }
-        if (f_res != NULL && g_res != NULL) {
-            break;
-        }else if(f_res != NULL && f_res->value){
-            break;
-        }else if(g_res != NULL && g_res->value){
-            break;
-        }
-        if (f_res == NULL && g_res == NULL) {
-            printf("both functions are not calculated yet, should we proceed? [y\\n]: ");
-        } else if (f_res == NULL) {
-            printf("f() not calculated yet, should we proceed? [y\\n]: ");
-        } else {
-            printf("g() not calculated yet, should we proceed? [y\\n]: ");
-        }
-
-        char answer = read_char();
-        if (answer == 'n') {
-            break;
-        } else if (answer != 'y') {
-            printf("illegal option %c aborting", answer);
-            aborted = true;
-        }
-    }
-
-    if (!aborted) {
-        printf("result: ");
-        if (f_res != NULL && g_res != NULL) {
-            print_bool(f_res->value || g_res->value);
-        } else if (f_res != NULL) {
-//            printf("f result: %s\n", f_res->value ? "true" : "false");
-            if (f_res->value) {
-                print_bool(true);
-            } else {
-                printf("undefined");
-            }
-        } else if (g_res != NULL) {
-            if (g_res->value) {
-                print_bool(true);
-            } else {
-                printf("undefined");
-            }
-        } else {
-            printf("undefined");
-        }
-    }
-
-//    ThreadArg_delete(f_arg);
-//    ThreadArg_delete(g_arg);
-    return 0;
-}
+//int main() {
+//    printf("main started\n");
+//    pthread_t thread_ids[2];
+//
+//    struct transfer_queue *queue = transfer_queue_new();
+//
+//    struct Result *f_result = Result_new(true);
+//    struct ResultContainer *f_container = ResultContainer_new(NULL);
+//    struct Message *f_message = Message_new("this is from f");
+//    bool f_perform_message_action = true;
+//    struct ThreadArg *f_arg = ThreadArg_new(
+//            f_result,
+//            f_container,
+//            f_message,
+//            queue,
+//            f_perform_message_action
+//    );
+////    printf("f_arg constructed\n");
+//
+//    struct Result *g_result = Result_new(true);
+//    struct ResultContainer *g_container = ResultContainer_new(NULL);
+//    struct Message *g_message = Message_new("this is from g");
+//    bool g_perform_message_action = true;
+//    struct ThreadArg *g_arg = ThreadArg_new(
+//            g_result,
+//            g_container,
+//            g_message,
+//            queue,
+//            g_perform_message_action
+//    );
+////    printf("g_arg constructed\n");
+//
+//    int error = 0;
+//
+//    error = pthread_create(&(thread_ids[0]), NULL, &f, (void *) f_arg);
+//    if (error != 0) {
+//        printf("\nThread for function f() cannot be created: [%s]\n", strerror(error));
+//    }
+//
+//    error = pthread_create(&(thread_ids[1]), NULL, &g, (void *) g_arg);
+//    if (error != 0) {
+//        printf("\nThread for function g() cannot be created: [%s]\n", strerror(error));
+//    }
+//
+//    struct Result *f_res = NULL;
+//    struct Result *g_res = NULL;
+//    bool aborted = false;
+//    while (true) {
+//        sleep(2);
+//        if (f_arg->result_container->result != NULL) {
+//            printf("receive result from f(): %s\n", f_arg->result_container->result->value ? "true" : "false");
+//            f_res = f_arg->result_container->result;
+//        }
+//        if (g_arg->result_container->result != NULL) {
+//            printf("receive result from g(): %s\n", g_arg->result_container->result->value ? "true" : "false");
+//            g_res = g_arg->result_container->result;
+//        }
+//        if (f_res != NULL && g_res != NULL) {
+//            break;
+//        }else if(f_res != NULL && f_res->value){
+//            break;
+//        }else if(g_res != NULL && g_res->value){
+//            break;
+//        }
+//        if (f_res == NULL && g_res == NULL) {
+//            printf("both functions are not calculated yet, should we proceed? [y\\n]: ");
+//        } else if (f_res == NULL) {
+//            printf("f() not calculated yet, should we proceed? [y\\n]: ");
+//        } else {
+//            printf("g() not calculated yet, should we proceed? [y\\n]: ");
+//        }
+//
+//        char answer = read_char();
+//        if (answer == 'n') {
+//            break;
+//        } else if (answer != 'y') {
+//            printf("illegal option %c aborting", answer);
+//            aborted = true;
+//        }
+//    }
+//
+//    if (!aborted) {
+//        printf("result: ");
+//        if (f_res != NULL && g_res != NULL) {
+//            print_bool(f_res->value || g_res->value);
+//        } else if (f_res != NULL) {
+////            printf("f result: %s\n", f_res->value ? "true" : "false");
+//            if (f_res->value) {
+//                print_bool(true);
+//            } else {
+//                printf("undefined");
+//            }
+//        } else if (g_res != NULL) {
+//            if (g_res->value) {
+//                print_bool(true);
+//            } else {
+//                printf("undefined");
+//            }
+//        } else {
+//            printf("undefined");
+//        }
+//    }
+//
+////    ThreadArg_delete(f_arg);
+////    ThreadArg_delete(g_arg);
+//    return 0;
+//}

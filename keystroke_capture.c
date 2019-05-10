@@ -2,7 +2,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
-
+// sudo ./keystroke_capture /dev/input/event4
 int main(int argc, char **argv) {
     int fd;
     if (argc < 2) {
